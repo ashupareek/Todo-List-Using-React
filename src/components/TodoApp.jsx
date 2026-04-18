@@ -2,8 +2,8 @@ import React, { useState } from "react";
 
 function TodoApp() {
   const [todos, setTodos] = useState([
-    "Develop to-do list on your own",
-    "Add CRUD functionality",
+    { text: "Develop to-do list on your own", completed: false },
+    { text: "Add CRUD functionality", completed: false },
   ]);
   const [newTodo, setNewTodo] = useState("");
 
@@ -12,8 +12,15 @@ function TodoApp() {
   }
 
   function addTodo() {
-    if (newTodo.trim() !== "") {
-      setTodos((todo) => [newTodo, ...todo]);
+    const trimmedTodo = newTodo.trim();
+
+    if (trimmedTodo !== "") {
+      const todoObject = {
+        text: trimmedTodo,
+        completed: false,
+      };
+
+      setTodos((prevTodos) => [todoObject, ...prevTodos]);
       setNewTodo("");
     }
   }
@@ -24,7 +31,7 @@ function TodoApp() {
   }
 
   function editTodo(id) {
-    const updatedText = prompt("Edit your todo:", todos[id]);
+    const updatedText = prompt("Edit your todo:", todos[id].text);
 
     if (updatedText === null) return;
 
@@ -34,7 +41,24 @@ function TodoApp() {
 
     const updatedTodos = todos.map((todo, index) => {
       if (index === id) {
-        return trimmedText;
+        return {
+          ...todo,
+          text: trimmedText,
+        };
+      }
+      return todo;
+    });
+
+    setTodos(updatedTodos);
+  }
+
+  function toggleComplete(id) {
+    const updatedTodos = todos.map((todo, index) => {
+      if (index === id) {
+        return {
+          ...todo,
+          completed: !todo.completed,
+        };
       }
       return todo;
     });
@@ -61,7 +85,21 @@ function TodoApp() {
       <ol>
         {todos.map((todo, index) => (
           <li key={index}>
-            <span className="text">{todo}</span>
+            <span
+              className="text"
+              style={{
+                textDecoration: todo.completed ? "line-through" : "none",
+              }}
+            >
+              {todo.text}
+            </span>
+
+            <button
+              className="complete-button"
+              onClick={() => toggleComplete(index)}
+            >
+              {todo.completed ? "❌" : "✅" }
+            </button>
 
             <button
               className="delete-button"

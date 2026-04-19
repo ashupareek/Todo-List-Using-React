@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useReducer, useState } from "react";
+import { todoReducer } from "../reducers/TodoReducers";
 
 function TodoApp() {
-  const [todos, setTodos] = useState([
+  const [todos, dispatch] = useReducer(todoReducer, [
     { text: "Develop to-do list on your own", completed: false },
     { text: "Add CRUD functionality", completed: false },
   ]);
+
   const [newTodo, setNewTodo] = useState("");
 
   function handleInputChange(event) {
@@ -12,22 +14,19 @@ function TodoApp() {
   }
 
   function addTodo() {
-    const trimmedTodo = newTodo.trim();
+    dispatch({
+      type: "ADD_TODO",
+      payload: newTodo,
+    });
 
-    if (trimmedTodo !== "") {
-      const todoObject = {
-        text: trimmedTodo,
-        completed: false,
-      };
-
-      setTodos((prevTodos) => [todoObject, ...prevTodos]);
-      setNewTodo("");
-    }
+    setNewTodo("");
   }
 
   function deleteTodo(id) {
-    const updatedTodo = todos.filter((_, index) => index !== id);
-    setTodos(updatedTodo);
+    dispatch({
+      type: "DELETE_TODO",
+      payload: id,
+    });
   }
 
   function editTodo(id) {
@@ -35,35 +34,20 @@ function TodoApp() {
 
     if (updatedText === null) return;
 
-    const trimmedText = updatedText.trim();
-
-    if (trimmedText === "") return;
-
-    const updatedTodos = todos.map((todo, index) => {
-      if (index === id) {
-        return {
-          ...todo,
-          text: trimmedText,
-        };
-      }
-      return todo;
+    dispatch({
+      type: "EDIT_TODO",
+      payload: {
+        id,
+        updatedText,
+      },
     });
-
-    setTodos(updatedTodos);
   }
 
   function toggleComplete(id) {
-    const updatedTodos = todos.map((todo, index) => {
-      if (index === id) {
-        return {
-          ...todo,
-          completed: !todo.completed,
-        };
-      }
-      return todo;
+    dispatch({
+      type: "TOGGLE_TODO",
+      payload: id,
     });
-
-    setTodos(updatedTodos);
   }
 
   return (
@@ -98,20 +82,14 @@ function TodoApp() {
               className="complete-button"
               onClick={() => toggleComplete(index)}
             >
-              {todo.completed ? "❌" : "✅" }
+              {todo.completed ? "❌" : "✅"}
             </button>
 
-            <button
-              className="delete-button"
-              onClick={() => deleteTodo(index)}
-            >
+            <button className="delete-button" onClick={() => deleteTodo(index)}>
               Delete
             </button>
 
-            <button
-              className="edit-button"
-              onClick={() => editTodo(index)}
-            >
+            <button className="edit-button" onClick={() => editTodo(index)}>
               Edit
             </button>
           </li>
